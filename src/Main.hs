@@ -11,7 +11,7 @@ import qualified Data.Text                  as T
 import qualified Data.ByteString.Lazy.Char8 as BL
 
 import Notification
-import Store (saveNotification)
+import Store (migrate, saveNotification)
 
 type HandlerFunc = SockAddr -> String -> IO ()
 
@@ -47,9 +47,9 @@ serveLog port handlerfunc = withSocketsDo $
 -- A simple handler that prints incoming packets
 plainHandler :: HandlerFunc
 plainHandler addr msg = do
+  putStrLn $ show msg
   case eitherDecode (BL.pack msg) :: Either String Notification of
     Right n ->
-      {- putStrLn $ show n -}
       saveNotification n
       
     Left s -> do
@@ -61,7 +61,10 @@ plainHandler addr msg = do
       
 
 
-main = serveLog "5555" plainHandler
+main = do
+  migrate
+  serveLog "5555" plainHandler
+
 
 
 

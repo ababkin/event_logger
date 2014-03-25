@@ -31,9 +31,12 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 
 |]
 
+migrate :: IO ()
+migrate = runSqlite ":memory:" $ do
+  runMigration migrateAll
+
 saveNotification :: Notification -> IO ()
 saveNotification n = runSqlite ":memory:" $ do
-  runMigration migrateAll
   let notificationRecord = toNotificationRecord n
   liftIO $ putStrLn $ "inserting: " ++ (show notificationRecord)
   notificationId <- insert notificationRecord

@@ -70,12 +70,10 @@ instance FromJSON Notification where
     eventType <- getEventType <$> v .: "event_type"
     payload <- v .: "payload"
     specificPayload <- case getPayloadType eventType of
-      RenderPayloadType ->
-        RenderPayload <$> payload .: "identifier"
-      SqlPayloadType ->
-        SqlPayload <$> payload .: "identifier"
-      ControllerPayloadType ->
-        ControllerPayload <$> payload .: "controller" <*> payload .: "action"
+      RenderPayloadType     -> RenderPayload      <$> payload .: "identifier"
+      SqlPayloadType        -> SqlPayload         <$> payload .: "sql"
+      ControllerPayloadType -> ControllerPayload  <$> payload .: "controller"
+                                                  <*> payload .: "action"
       _ -> return UnknownPayload
 
     sourceType  <- v .: "source_type"
