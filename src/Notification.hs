@@ -1,10 +1,12 @@
 {-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Notification where
 
 import Control.Applicative
 import Data.Aeson
 import GHC.Generics
+import Control.Lens
 
 import qualified Data.Text as T
 
@@ -37,16 +39,16 @@ data PayloadType =
 
 data Payload = 
   RenderPayload{
-    pIdentifier  :: T.Text
+    _identifier  :: T.Text
   }
   |
   SqlPayload{
-    pSql         :: T.Text
+    _sql         :: T.Text
   }
   |
   ControllerPayload{
-    pController  :: T.Text
-  , pAction      :: T.Text
+    _controller  :: T.Text
+  , _action      :: T.Text
   } 
   |
   UnknownPayload
@@ -56,19 +58,21 @@ instance ToJSON Payload
 
 
 data Notification = Notification{
-    nSourceType :: T.Text
-  , nEventType  :: EventType
-  , nPayload    :: Payload
-  , nTimestamp  :: T.Text
-  , nStart      :: Int
-  , nDuration   :: Int
+    _sourceType :: T.Text
+  , _eventType  :: EventType
+  , _payload    :: Payload
+  , _timestamp  :: T.Text
+  , _start      :: Int
+  , _duration   :: Int
   } deriving (Show)
 
+makeLenses ''Payload
+makeLenses ''Notification
 
 instance FromJSON Notification where
   parseJSON (Object v) = do
-    eventType <- getEventType <$> v .: "event_type"
-    payload <- v .: "payload"
+    eventType       <- getEventType <$> v .: "event_type"
+    payload         <- v .: "payload"
     specificPayload <- case getPayloadType eventType of
       RenderPayloadType     -> RenderPayload      <$> payload .: "identifier"
       SqlPayloadType        -> SqlPayload         <$> payload .: "sql"
