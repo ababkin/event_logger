@@ -12,13 +12,19 @@ import Control.Monad.IO.Class (liftIO)
 import Database.Persist
 import Database.Persist.Postgresql
 import Database.Persist.TH
-import Data.Aeson (encode)
+import Data.Aeson (encode, decode)
 import Control.Lens
 
 import qualified Data.Text as T
 import qualified Data.ByteString.Lazy.Char8 as BL
 
 import Notification
+
+data Config = Config {
+    _dbname   :: String
+  , _user     :: String
+  , _password :: String
+  }
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
   NotificationRecord
